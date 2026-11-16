@@ -3,3 +3,6 @@ build/*/fonts/
 build/*/img/
 build/*/aud/
 output/
+build/*/v2/out/
+build/*/v2/*.wav
+build/*/v2/*.mp3
