@@ -40,16 +40,17 @@ SCENES = [
 # scene index -> (photo file, card box (x0,y0,x1,y1), focus point (fx,fy) as fractions, label)
 PH = os.path.join(os.path.dirname(V), "photos")
 PHOTOS = {
-    0: ("p1.jpg", (60, 620, 1020, 1180), (0.47, 0.42), "자료사진"),
+    0: ("p1.jpg", (150, 625, 930, 1395), (0.46, 0.45), "자료사진"),
     1: ("p2.jpg", (60, 620, 1020, 1100), (0.58, 0.40), "자료사진"),
-    2: ("p3_masked.jpg", (60, 620, 1020, 1060), (0.50, 0.40), "온라인 유포 사진 · 인물 모자이크 · 진위 미확인"),
+    2: ("p3_masked.jpg", (160, 620, 920, 1110), (0.50, 0.42), "유포 사진 · 모자이크 · 진위 미확인", 1.55),
     5: ("p5.jpg", (60, 620, 1020, 1060), (0.55, 0.50), "엔비디아 본사 · 자료사진"),
     6: ("p6.webp", (60, 620, 1020, 1100), (0.60, 0.45), "자료사진"),
 }
 AVATAR = ("p4.jpg", (0.495, 0.36), 0.33)  # scene 5: interim CEO portrait (focus, crop radius as frac of height)
 
 def load_card_img(i):
-    f, (x0, y0, x1, y1), (fx, fy), _ = PHOTOS[i]
+    f, (x0, y0, x1, y1), (fx, fy), _ = PHOTOS[i][:4]
+    zoom = PHOTOS[i][4] if len(PHOTOS[i]) > 4 else 1.0
     im = Image.open(os.path.join(PH, f)).convert("RGB")
     cw, ch = x1 - x0, y1 - y0
     # crop to the card aspect around the focus point, with 8% headroom for the in-card zoom
@@ -59,6 +60,7 @@ def load_card_img(i):
         nw, nh = int(h * ar), h
     else:
         nw, nh = w, int(w / ar)
+    nw, nh = int(nw / zoom), int(nh / zoom)
     cx = min(max(fx * w, nw / 2), w - nw / 2)
     cy = min(max(fy * h, nh / 2), h - nh / 2)
     im = im.crop((int(cx - nw / 2), int(cy - nh / 2), int(cx + nw / 2), int(cy + nh / 2)))
@@ -84,7 +86,7 @@ def round_mask(size, r):
     return _mask_cache[size]
 
 def draw_photo_card(frame, i, card, t, dur):
-    _, (x0, y0, x1, y1), _, label = PHOTOS[i]
+    _, (x0, y0, x1, y1), _, label = PHOTOS[i][:4]
     cw, ch = x1 - x0, y1 - y0
     a = ease((t - 0.15) / 0.45)
     if a <= 0:
@@ -187,13 +189,12 @@ def draw_info(img, kind, t, dur, cues):
             ai = ease((t - (cues[2], cues[4])[i]) / 0.4)
             if ai <= 0:
                 continue
-            y = 1095 + i * 140 + int((1 - ai) * 40)
-            rounded(d, (110, y, 970, y + 120), 26, (0, 0, 0, int(200 * ai)))
-            d.text((150, y + 60), k, font=f, fill=(255, 255, 255, int(255 * ai)), anchor="lm")
+            y = 1150 + i * 135 + int((1 - ai) * 40)
+            rounded(d, (160, y, 920, y + 115), 26, (0, 0, 0, int(200 * ai)))
+            d.text((200, y + 57), k, font=f, fill=(255, 255, 255, int(255 * ai)), anchor="lm")
             vw = d.textlength(v, font=f)
-            rounded(d, (930 - vw - 40, y + 16, 940, y + 104), 20, (*c, int(255 * ai)))
-            d.text((930 - vw - 20, y + 60), v, font=f, fill=(255, 255, 255, int(255 * ai)), anchor="lm")
-        d.text((W / 2, 1385), "※ 언론 보도 기준", font=font(FM, 32), fill=(220, 220, 220, A), anchor="mm")
+            rounded(d, (880 - vw - 40, y + 14, 890, y + 101), 20, (*c, int(255 * ai)))
+            d.text((880 - vw - 20, y + 57), v, font=f, fill=(255, 255, 255, int(255 * ai)), anchor="lm")
     elif kind == "drop":
         items = [("-15%", "장 초반 한때", cues[2]), ("-25%", "최근 한 달", cues[3])]
         for i, (num, lab, st) in enumerate(items):
