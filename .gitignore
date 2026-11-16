@@ -1,0 +1,5 @@
+build/*/out/
+build/*/fonts/
+build/*/img/
+build/*/aud/
+output/
