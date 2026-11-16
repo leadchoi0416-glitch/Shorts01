@@ -366,7 +366,7 @@ def main():
     enc.wait()
     final = os.path.join(out, "jensen_huang_shorts_v3.mp4")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", video, "-i", mix, "-c:v", "copy",
-                    "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", final], check=True)
+                    "-af", "volume=-1.5dB", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", final], check=True)
     print("wrote", final)
 
 if __name__ == "__main__":
